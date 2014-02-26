@@ -161,6 +161,32 @@ class Rescue {
         return $report;
     }
 
+//E# getReportV2() function
+
+    /**
+     * S# getChat() function
+     * Get chat log of a session
+     * @param int $sessionId The session id
+     * @return string Chat log if successful, false otherwise
+     */
+    public function getChat($sessionId) {
+        //Initialize a soap client
+        $soapclient = new SoapClient($this->link . "/api.asmx?wsdl");
+
+        $getChatParams = array(
+            'iSessionID' => $sessionId,
+            'sAuthCode' => $this->authCode
+        );
+
+        $getChatResult = $soapclient->getChat($getChatParams);
+        
+        if($getChatResult->getChatResult == 'getChat_OK'){//Sucess
+            return $getChatResult->sChatLog;
+        }else{//Error
+            return false;
+        }//E# if else statement
+    }
+//E# getChat() function
 }
 
 //E# Rescue() Class

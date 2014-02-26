@@ -6,12 +6,18 @@ use LogMeIn\Rescue;
 
 $rescue = new Rescue('edwinmugendi@gmail.com', '');
 /*
-  $authCode = $rescue->requestAuthCode('edwinmugendi@gmail.com', 'isabe11A');
+  //Request Auth Code
+  $authCode = $rescue->requestAuthCode('edwinmugendi@gmail.com', '');
 
   var_dump($authCode);
  */
+/*
+  //Repport
+  $report = $rescue->getReportV2('02/23/2014', '02/25/2014', 'SESSION', 13038860);
+  var_dump($report);
 
-$report = $rescue->getReportV2('02/23/2014', '02/25/2014', 'SESSION', 13038860);
+ *  */
+$chat = $rescue->getChat(254286943);
 
-var_dump($report);
+var_dump($chat);
 ?>
