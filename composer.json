@@ -1,0 +1,22 @@
+{
+    "name": "edwinmugendi/logmein",
+    "description": "LogMeIn API PHP Wrapper",
+    "homepage": "https://secure.logmeinrescue.com/welcome/webhelp/RescueAPI/API/API_Rescue_Overview.html",
+    "keywords": ["LogMeIn Rescue"],
+    "authors": [
+        {
+            "name": "Edwin Mugendi",
+            "email": "edwinmugendi@gmail.com"
+        }
+    ],
+    "require": {
+        "guzzle/guzzle": "dev-master",
+        "php": ">=5.1.2"
+    },
+    "autoload": {
+        "psr-0": {
+            "LogMeIn": "src/"
+        }
+    },
+    "minimum-stability": "dev"
+}
