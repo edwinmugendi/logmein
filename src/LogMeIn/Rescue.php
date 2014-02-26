@@ -105,9 +105,9 @@ class Rescue {
 
 //E# requestAuthCode() function
 
-    public function getReportV2($beginDate, $endDate, $reportArea, $nodeId, $beginTime = null, $endTime = null, $timeZone = 'UTC', $delimiter = '|', $nodeRef = "NODE") {
+    public function getReportV2($beginDate, $endDate, $reportArea, $nodeId, $beginTime = null, $endTime = null, $timeZone = 'UTC', $output = 'TEXT', $delimiter = '|', $nodeRef = "NODE") {
         //Initialize a soap client
-        $soapclient = new SoapClient($this->link . "/api.asmx?wsdl");
+        $soapClient = new SoapClient($this->link . "/api.asmx?wsdl");
 
         //Set the report area
         $reportAreaParams = array(
@@ -115,7 +115,7 @@ class Rescue {
             'sAuthCode' => $this->authCode
         );
 
-        $setReportAreaResponse = $soapclient->setReportArea($reportAreaParams);
+        $setReportAreaResponse = $soapClient->setReportArea($reportAreaParams);
 
         //Set date ranges
         $reportDateParams = array(
@@ -124,7 +124,7 @@ class Rescue {
             'sAuthCode' => $this->authCode
         );
 
-        $setReportDateResponse = $soapclient->setReportDate($reportDateParams);
+        $setReportDateResponse = $soapClient->setReportDate($reportDateParams);
 
         //Set time range
         if (!is_null($beginTime) && !is_null($beginTime)) {
@@ -133,44 +133,78 @@ class Rescue {
                 'eTime' => $endDate,
                 'sAuthCode' => $this->authCode
             );
-            $setReportTimeResponse = $soapclient->setReportTime($reportTimeParams);
+            $setReportTimeResponse = $soapClient->setReportTime($reportTimeParams);
         }//E# statement
-        
-        
-        
+
+        if ($output == 'XML') {//XML Output other wise default to TEXT
+            //Set time range
+            $outputParams = array(
+                'eOutput' => 'XML',
+                'sAuthCode' => $this->authCode
+            );
+
+            $outputResponse = $soapClient->setOutput($outputParams);
+        }//E# if statement
+
+        if ($timeZone !== 'UTC' && is_int($timeZone)) {//Use different timezone from UTC
+            $setTimezoneParams = array(
+                'sTimezone' => $timeZone,
+                'sAuthCode' => $this->authCode
+            );
+            $setTimezoneResponse = $soapClient->setTimezone($setTimezoneParams);
+        }//E# if statement
+
+
+        if ($delimiter !== '|') {
+            //define parameters
+            $delimiterParams = array(
+                'sDelimiter' => $delimiter,
+                'sAuthCode' => $this->authCode
+            );
+
+            //set the delimiter
+            $setDelimiterResponse = $soapClient->setDelimiter($delimiterParams);
+        }//E# if statement
         //Set the node
         $getReportParams = array(
             'iNodeID' => $nodeId,
             'eNodeRef' => $nodeRef,
             'sAuthCode' => $this->authCode
         );
+
         //Get report and convert to array
-        $getReportResponse = $this->object_to_array($soapclient->getReport($getReportParams));
+        $apiResponse = $soapClient->getReport($getReportParams);
 
-        //parse results into an array (NuSOAP stinks at multilevel XML
-        $reportData = explode("\n", $getReportResponse['sReport']);
+        //Get the api code
+        $apiResponseCode = strtoupper(substr($apiResponse->getReportResult, 10));
 
-        $report = false;
-        foreach ($reportData as $key => $val) {//Loop via report data
-            if ($key == 0) {//Header
-                $column = explode("|", $val);
-            }//E# if statement
+        if ($apiResponseCode == 'OK') {
+            //Parse results into an array
+            $reportData = explode("\n", $this->object_to_array($apiResponse)['sReport']);
 
+            $report = '';
+            foreach ($reportData as $key => $val) {//Loop via report data
+                if ($key == 0) {//Header
+                    $column = explode($delimiter, $val);
+                }//E# if statement
 
-            if (trim($val) !== '') {
-                $colData = explode("|", trim($val));
-                foreach ($colData as $ckey => $val) {
-                    if (empty($column[$ckey])) {
-                        $column[$ckey] = $ckey;
-                    } else {
-                        $column[$ckey] = str_replace(" ", "", $column[$ckey]);
-                    }//E# if else statment
-                    $report[$key][$column[$ckey]] = $val;
-                }//E# foreach statement
-            }//E# if statement
-        }//E# foreach statement
+                if (($trimmedVal = trim($val)) !== '') {
+                    $colData = explode($delimiter, trim($trimmedVal));
+                    foreach ($colData as $ckey => $val) {
+                        if (empty($column[$ckey])) {
+                            $column[$ckey] = $ckey;
+                        } else {
+                            $column[$ckey] = str_replace(" ", "", $column[$ckey]);
+                        }//E# if else statment
+                        $report[$key][$column[$ckey]] = $val;
+                    }//E# foreach statement
+                }//E# if statement
+            }//E# foreach statement
 
-        return $report;
+            return $report;
+        } else {
+            return $apiResponse;
+        }
     }
 
 //E# getReportV2() function
@@ -186,7 +220,7 @@ class Rescue {
      */
     public function getChatOrNote($chatOrNote, $sessionId) {
         //Initialize a soap client
-        $soapclient = new SoapClient($this->link . "/api.asmx?wsdl");
+        $soapClient = new SoapClient($this->link . "/api.asmx?wsdl");
 
         //Set parameters
         $params = array(
@@ -195,9 +229,9 @@ class Rescue {
         );
 
         if ($chatOrNote == 'chat') {//Get chat
-            $apiResult = $soapclient->getChat($params);
+            $apiResponse = $soapClient->getChat($params);
         } else if ($chatOrNote == 'note') {//Get note
-            $apiResult = $soapclient->getNote($params);
+            $apiResponse = $soapClient->getNote($params);
         } else {//ERROR
             return 'ERROR';
         }//E# if else statement
@@ -205,12 +239,12 @@ class Rescue {
         $chatOrNoteResult = $chatOrNote == 'chat' ? 'getChatResult' : 'getNoteResult';
 
         //Get the api code
-        $apiResultCode = strtoupper(substr($apiResult->$chatOrNoteResult, 8));
+        $apiResponseCode = strtoupper(substr($apiResponse->$chatOrNoteResult, 8));
 
-        if ($apiResultCode == 'OK') {//OK
-            return $chatOrNote == 'chat' ? $apiResult->sChatLog : $apiResult->sNote;
-        }  else {//ERROR
-            return $apiResultCode;
+        if ($apiResponseCode == 'OK') {//OK
+            return $chatOrNote == 'chat' ? $apiResponse->sChatLog : $apiResponse->sNote;
+        } else {//ERROR
+            return $apiResponseCode;
         }//E# if else statement
     }
 

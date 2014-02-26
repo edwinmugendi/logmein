@@ -11,14 +11,16 @@ $rescue = new Rescue('edwinmugendi@gmail.com', 'isabe11A');
 
   var_dump($authCode);
  */
-/*
+
   //Repport
-  $report = $rescue->getReportV2('02/23/2014', '02/25/2014', 'SESSION', 13038860);
+  $report = $rescue->getReportV2('02/23/2014', '02/25/2014', 'SESSION', 13038860,null,null,'UTC','TEXT','|');
   var_dump($report);
 
- *  */
+/*
 //Session 254286942
 $chat = $rescue->getChatOrNote('chat',254286942);
 
 var_dump($chat);
-?>
+
+ * 
+ */
