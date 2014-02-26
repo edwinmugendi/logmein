@@ -246,7 +246,12 @@ class Rescue {
         $apiResponseCode = strtoupper(substr($apiResponse->$chatOrNoteResult, 8));
 
         if ($apiResponseCode == 'OK') {//OK
-            return $chatOrNote == 'chat' ? $apiResponse->sChatLog : $apiResponse->sNote;
+            $log = $chatOrNote == 'chat' ? $apiResponse->sChatLog : $apiResponse->sNote;
+
+            return array(
+                'status' => 1,
+                'log' => $log
+            );
         } else {//ERROR
             return $apiResponseCode;
         }//E# if else statement
