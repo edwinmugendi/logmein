@@ -179,17 +179,21 @@ class Rescue {
         $apiResponseCode = strtoupper(substr($apiResponse->getReportResult, 10));
 
         if ($apiResponseCode == 'OK') {
+            //Get the api response as array
+            $apiResponseArray = $this->object_to_array($apiResponse);
             //Parse results into an array
-            $reportData = explode("\n", $this->object_to_array($apiResponse)['sReport']);
+            $reportData = explode("\n", $apiResponseArray['sReport']);
 
             $report = '';
             foreach ($reportData as $key => $val) {//Loop via report data
                 if ($key == 0) {//Header
                     $column = explode($delimiter, $val);
+                    array_pop($column);
                 }//E# if statement
 
                 if (($trimmedVal = trim($val)) !== '') {
                     $colData = explode($delimiter, trim($trimmedVal));
+                    array_pop($colData);
                     foreach ($colData as $ckey => $val) {
                         if (empty($column[$ckey])) {
                             $column[$ckey] = $ckey;
