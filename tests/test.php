@@ -13,7 +13,7 @@ $rescue = new Rescue('edwinmugendi@gmail.com', '');
  */
 
   //Repport
-  $report = $rescue->getReportV2('02/23/2014', '02/25/2014', 'SESSION', 13038860,null,null,'UTC','TEXT','|');
+  $report = $rescue->getReportV2('2014-02-20T07:00:00', '2014-02-26T12:30:20', 'SESSION', 13038860,null,null,'UTC','TEXT','|');
   var_dump($report);
 
 /*

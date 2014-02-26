@@ -115,17 +115,19 @@ class Rescue {
             'sAuthCode' => $this->authCode
         );
 
-        $setReportAreaResponse = $soapClient->setReportArea($reportAreaParams);
-
+        $setReportAreaResponse = $soapClient->setReportArea_v2($reportAreaParams);
+        //var_dump($setReportAreaResponse);
+       
         //Set date ranges
         $reportDateParams = array(
-            'sBeginDate' => $beginDate,
-            'sEndDate' => $endDate,
+            'dBeginDate' => $beginDate,
+            'dEndDate' => $endDate,
             'sAuthCode' => $this->authCode
         );
 
-        $setReportDateResponse = $soapClient->setReportDate($reportDateParams);
-
+        $setReportDateResponse = $soapClient->setReportDate_v2($reportDateParams);
+        
+         
         //Set time range
         if (!is_null($beginTime) && !is_null($beginTime)) {
             $reportTimeParams = array(
@@ -173,10 +175,10 @@ class Rescue {
         );
 
         //Get report and convert to array
-        $apiResponse = $soapClient->getReport($getReportParams);
-
+        $apiResponse = $soapClient->getReport_v2($getReportParams);
+       
         //Get the api code
-        $apiResponseCode = strtoupper(substr($apiResponse->getReportResult, 10));
+        $apiResponseCode = strtoupper(substr($apiResponse->getReport_v2Result, 10));
 
         if ($apiResponseCode == 'OK') {
             //Get the api response as array
