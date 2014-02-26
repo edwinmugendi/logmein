@@ -105,7 +105,7 @@ class Rescue {
 
 //E# requestAuthCode() function
 
-    public function getReportV2($beginDate, $endDate, $reportArea, $nodeId, $nodeRef = "NODE") {
+    public function getReportV2($beginDate, $endDate, $reportArea, $nodeId, $beginTime = null, $endTime = null, $timeZone = 'UTC', $delimiter = '|', $nodeRef = "NODE") {
         //Initialize a soap client
         $soapclient = new SoapClient($this->link . "/api.asmx?wsdl");
 
@@ -117,7 +117,7 @@ class Rescue {
 
         $setReportAreaResponse = $soapclient->setReportArea($reportAreaParams);
 
-        //Set data ranges
+        //Set date ranges
         $reportDateParams = array(
             'sBeginDate' => $beginDate,
             'sEndDate' => $endDate,
@@ -126,6 +126,18 @@ class Rescue {
 
         $setReportDateResponse = $soapclient->setReportDate($reportDateParams);
 
+        //Set time range
+        if (!is_null($beginTime) && !is_null($beginTime)) {
+            $reportTimeParams = array(
+                'bTime' => $beginDate,
+                'eTime' => $endDate,
+                'sAuthCode' => $this->authCode
+            );
+            $setReportTimeResponse = $soapclient->setReportTime($reportTimeParams);
+        }//E# statement
+        
+        
+        
         //Set the node
         $getReportParams = array(
             'iNodeID' => $nodeId,
@@ -164,29 +176,45 @@ class Rescue {
 //E# getReportV2() function
 
     /**
-     * S# getChat() function
-     * Get chat log of a session
+     * S# getChatOrNote() function
+     * Get chat log or technicians note of a session
+     * @param string $chatOrNote Chat or note
      * @param int $sessionId The session id
-     * @return string Chat log if successful, false otherwise
+     * @return string Chat log / Log if successful, or code as specified in the official API
+     * @link https://secure.logmeinrescue.com/welcome/webhelp/RescueAPI/API/API_Rescue_getNote.html Get Note API
+     * @link https://secure.logmeinrescue.com/welcome/webhelp/RescueAPI/API/API_Rescue_getChat.html Get Chat API
      */
-    public function getChat($sessionId) {
+    public function getChatOrNote($chatOrNote, $sessionId) {
         //Initialize a soap client
         $soapclient = new SoapClient($this->link . "/api.asmx?wsdl");
 
-        $getChatParams = array(
+        //Set parameters
+        $params = array(
             'iSessionID' => $sessionId,
             'sAuthCode' => $this->authCode
         );
 
-        $getChatResult = $soapclient->getChat($getChatParams);
-        
-        if($getChatResult->getChatResult == 'getChat_OK'){//Sucess
-            return $getChatResult->sChatLog;
-        }else{//Error
-            return false;
+        if ($chatOrNote == 'chat') {//Get chat
+            $apiResult = $soapclient->getChat($params);
+        } else if ($chatOrNote == 'note') {//Get note
+            $apiResult = $soapclient->getNote($params);
+        } else {//ERROR
+            return 'ERROR';
+        }//E# if else statement
+        //Set the api result property
+        $chatOrNoteResult = $chatOrNote == 'chat' ? 'getChatResult' : 'getNoteResult';
+
+        //Get the api code
+        $apiResultCode = strtoupper(substr($apiResult->$chatOrNoteResult, 8));
+
+        if ($apiResultCode == 'OK') {//OK
+            return $chatOrNote == 'chat' ? $apiResult->sChatLog : $apiResult->sNote;
+        }  else {//ERROR
+            return $apiResultCode;
         }//E# if else statement
     }
-//E# getChat() function
+
+//E# getChatOrNote() function
 }
 
 //E# Rescue() Class

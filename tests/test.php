@@ -4,7 +4,7 @@ require_once __DIR__ . '/../vendor/autoload.php'; // Autoload files using Compos
 
 use LogMeIn\Rescue;
 
-$rescue = new Rescue('edwinmugendi@gmail.com', '');
+$rescue = new Rescue('edwinmugendi@gmail.com', 'isabe11A');
 /*
   //Request Auth Code
   $authCode = $rescue->requestAuthCode('edwinmugendi@gmail.com', '');
@@ -17,7 +17,8 @@ $rescue = new Rescue('edwinmugendi@gmail.com', '');
   var_dump($report);
 
  *  */
-$chat = $rescue->getChat(254286943);
+//Session 254286942
+$chat = $rescue->getChatOrNote('chat',254286942);
 
 var_dump($chat);
 ?>
