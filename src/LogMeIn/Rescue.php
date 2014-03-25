@@ -5,6 +5,7 @@ namespace LogMeIn;
 use Guzzle\Http\Client;
 use SoapClient;
 use DateTime;
+use DateTimeZone;
 
 /**
  * S# Rescue() Class
@@ -37,10 +38,19 @@ class Rescue {
         //Intialize the guzzle client
         $this->guzzleClient = new Client($this->link);
 
-        $lastDate = new DateTime($configs['authRequestedAt']);
-        $today = new DateTime();
+        //Define utc timezone 
+        $utc = new DateTimeZone('UTC');
+
+        //Get last api call date
+        $lastDate = new DateTime($configs['authRequestedAt'], $utc);
+
+        //Get current date
+        $today = new DateTime(gmdate('Y-m-d'), $utc);
+
+        //Find date difference
         $dDiff = $lastDate->diff($today);
-        if ($dDiff->days > 18) {
+
+        if ($dDiff->days > 10) {
             $this->authCode = $this->requestAuthCode($email, $pwd);
         } else {
             $this->authCode = $configs['authCode'];
@@ -91,7 +101,7 @@ class Rescue {
 
             //Set auth code and last date to request auth
             $configs['authCode'] = $authCode;
-            $configs['authRequestedAt'] = date("Y-m-d");
+            $configs['authRequestedAt'] = gmdate("Y-m-d");
 
             //Open and save the configss
             $fp = fopen(__DIR__ . '/configs.json', 'w+');
@@ -116,8 +126,7 @@ class Rescue {
         );
 
         $setReportAreaResponse = $soapClient->setReportArea_v2($reportAreaParams);
-      //  var_dump($setReportAreaResponse);
-       
+        //  var_dump($setReportAreaResponse);
         //Set date ranges
         $reportDateParams = array(
             'dBeginDate' => $beginDate,
@@ -126,8 +135,7 @@ class Rescue {
         );
 
         $setReportDateResponse = $soapClient->setReportDate_v2($reportDateParams);
-       // var_dump($setReportDateResponse);
-         
+        // var_dump($setReportDateResponse);
         //Set time range
         if (!is_null($beginTime) && !is_null($beginTime)) {
             $reportTimeParams = array(
@@ -178,7 +186,7 @@ class Rescue {
 
         //Get report and convert to array
         $apiResponse = $soapClient->getReport_v2($getReportParams);
-        
+
         var_dump($apiResponse);
         //Get the api code
         $apiResponseCode = strtoupper(substr($apiResponse->getReport_v2Result, 10));
@@ -263,8 +271,6 @@ class Rescue {
     }
 
 //E# getChatOrNote() function
-    
-    
 }
 
 //E# Rescue() Class

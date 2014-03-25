@@ -10,14 +10,12 @@ $rescue = new Rescue('edwin.sapama@gmail.com', 'Computer1');
   $authCode = $rescue->requestAuthCode('edwin.sapama@gmail.com', 'Computer1');
 
   var_dump($authCode);
- * 
  */
- 
 
   //Repport
-  $report = $rescue->getReportV2('2014-02-20T07:00:00', '2014-02-26T12:30:20', 'SESSION', 7426179,null,null,'UTC','TEXT','|');
+  $report = $rescue->getReportV2('2014-02-20T07:00:00', '2014-02-20T12:30:20', 'SESSION', 7426179,null,null,'UTC','TEXT','|');
   var_dump($report);
-/*
+
 /*
 //Session 254286942
 $chat = $rescue->getChatOrNote('chat',254286942);
