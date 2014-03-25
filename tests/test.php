@@ -4,10 +4,10 @@ require_once __DIR__ . '/../vendor/autoload.php'; // Autoload files using Compos
 
 use LogMeIn\Rescue;
 
-$rescue = new Rescue('edwin.sapama@gmail.com', 'Computer1');
+$rescue = new Rescue('edwin.sapama@gmail.com', '');
 /*
   //Request Auth Code
-  $authCode = $rescue->requestAuthCode('edwin.sapama@gmail.com', 'Computer1');
+  $authCode = $rescue->requestAuthCode('edwin.sapama@gmail.com', '');
 
   var_dump($authCode);
  */
