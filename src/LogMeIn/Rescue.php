@@ -51,8 +51,10 @@ class Rescue {
         $dDiff = $lastDate->diff($today);
 
         if ($dDiff->days > 10) {
+            var_dump("more 10");
             $this->authCode = $this->requestAuthCode($email, $pwd);
         } else {
+            var_dump("less 10");
             $this->authCode = $configs['authCode'];
         }//E# if else statement
     }
@@ -76,19 +78,22 @@ class Rescue {
      * @param string $pwd Your password
      * */
     public function requestAuthCode($email, $pwd) {
-        //Build endpoint
-        $this->guzzleRequest = $this->guzzleClient->get('requestAuthCode.aspx');
+        //Build the url
+        $url = $this->link . '/requestAuthCode.aspx?email=' . $email . '&pwd=' . $pwd;
+        // Get cURL resource
+        $curl = curl_init();
 
-        //Set query parameters
-        $query = $this->guzzleRequest->getQuery();
-        $query->set('email', $email);
-        $query->set('pwd', $pwd);
+        // Set curl options
+        curl_setopt_array($curl, array(
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_URL => $url,
+        ));
 
-        //Call API
-        $this->guzzleResponse = $this->guzzleRequest->send();
+        // Send the request & save response to response
+        $response = curl_exec($curl);
 
-        //Get request
-        $response = trim($this->guzzleResponse->getBody(true));
+        // Close request to clear up some resources
+        curl_close($curl);
 
         if ($response == 'INVALID') {//Invalid request
             return 'INVALID';
