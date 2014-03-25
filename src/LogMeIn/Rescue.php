@@ -116,7 +116,7 @@ class Rescue {
         );
 
         $setReportAreaResponse = $soapClient->setReportArea_v2($reportAreaParams);
-        //var_dump($setReportAreaResponse);
+      //  var_dump($setReportAreaResponse);
        
         //Set date ranges
         $reportDateParams = array(
@@ -126,7 +126,7 @@ class Rescue {
         );
 
         $setReportDateResponse = $soapClient->setReportDate_v2($reportDateParams);
-        
+       // var_dump($setReportDateResponse);
          
         //Set time range
         if (!is_null($beginTime) && !is_null($beginTime)) {
@@ -154,6 +154,7 @@ class Rescue {
                 'sAuthCode' => $this->authCode
             );
             $setTimezoneResponse = $soapClient->setTimezone($setTimezoneParams);
+            var_dump($setTimezoneResponse);
         }//E# if statement
 
 
@@ -166,6 +167,7 @@ class Rescue {
 
             //set the delimiter
             $setDelimiterResponse = $soapClient->setDelimiter($delimiterParams);
+            var_dump($setDelimiterResponse);
         }//E# if statement
         //Set the node
         $getReportParams = array(
@@ -176,7 +178,8 @@ class Rescue {
 
         //Get report and convert to array
         $apiResponse = $soapClient->getReport_v2($getReportParams);
-       
+        
+        var_dump($apiResponse);
         //Get the api code
         $apiResponseCode = strtoupper(substr($apiResponse->getReport_v2Result, 10));
 
@@ -260,6 +263,8 @@ class Rescue {
     }
 
 //E# getChatOrNote() function
+    
+    
 }
 
 //E# Rescue() Class
