@@ -197,8 +197,6 @@ class Rescue {
      * @link https://secure.logmeinrescue.com/welcome/webhelp/RescueAPI/API/API_Rescue_getChat.html Get Chat API
      */
     public function getChatOrNote($chatOrNote, $sessionId) {
-        //Initialize a soap client
-        $this->soapClient = new \SoapClient($this->link . "/api.asmx?wsdl");
         
         //Set parameters
         $params = array(
@@ -207,6 +205,7 @@ class Rescue {
 
         if ($chatOrNote == 'chat') {//Get chat
             $apiResponse = $this->soapClient->getChat($params);
+            var_dump($apiResponse);
         } else if ($chatOrNote == 'note') {//Get note
             $apiResponse = $this->soapClient->getNote($params);
         } else {//ERROR
