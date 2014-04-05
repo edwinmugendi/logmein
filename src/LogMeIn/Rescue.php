@@ -16,12 +16,7 @@ class Rescue {
 //The API password
     private $pwd;
 //Curl guzzle object
-    private $guzzleClient;
-//Curl guzzle object
-    private $guzzleRequest;
-//Curl guzzle object
-    private $guzzleResponse;
-
+    private $soapClient;
     /**
      * S# __construct() function
      * Constructor
@@ -31,6 +26,18 @@ class Rescue {
         $this->email = $email;
         $this->pwd = $pwd;
         $this->requestAuthCode($this->email, $this->pwd);
+        
+         //Initialize a soap client
+        $this->soapClient = new \SoapClient($this->link . "/api.asmx?wsdl");
+        
+        //define parameters
+        $loginParams = array(
+            'sEmail' => $this->email,
+            'sPassword' => $this->pwd
+        );
+        
+        //login
+        $loginResult = $this->soapClient->login($loginParams);
     }
 
 //E# __construct() function
@@ -80,24 +87,12 @@ class Rescue {
 //E# requestAuthCode() function
 
     public function getReportV2($beginDate, $endDate, $reportArea, $nodeId, $beginTime = null, $endTime = null, $timeZone = 'UTC', $output = 'TEXT', $delimiter = '|', $nodeRef = "NODE") {
-        //Initialize a soap client
-        $soapClient = new \SoapClient($this->link . "/api.asmx?wsdl");
-        
-        //define parameters
-        $loginParams = array(
-            'sEmail' => $this->email,
-            'sPassword' => $this->pwd
-        );
-        
-        //login
-        $loginResult = $soapClient->login($loginParams);
-        
          //Set the report area
         $reportAreaParams = array(
             'eReportArea' => $reportArea
         );
 
-        $setReportAreaResponse = $soapClient->setReportArea_v2($reportAreaParams);
+        $setReportAreaResponse = $this->soapClient->setReportArea_v2($reportAreaParams);
         //  var_dump($setReportAreaResponse);
         //Set date ranges
         $reportDateParams = array(
@@ -105,7 +100,7 @@ class Rescue {
             'dEndDate' => $endDate,
         );
 
-        $setReportDateResponse = $soapClient->setReportDate_v2($reportDateParams);
+        $setReportDateResponse = $this->soapClient->setReportDate_v2($reportDateParams);
         // var_dump($setReportDateResponse);
         //Set time range
         if (!is_null($beginTime) && !is_null($beginTime)) {
@@ -113,7 +108,7 @@ class Rescue {
                 'bTime' => $beginDate,
                 'eTime' => $endDate,
             );
-            $setReportTimeResponse = $soapClient->setReportTime($reportTimeParams);
+            $setReportTimeResponse = $this->soapClient->setReportTime($reportTimeParams);
         }//E# statement
 
         if ($output == 'XML') {//XML Output other wise default to TEXT
@@ -122,14 +117,14 @@ class Rescue {
                 'eOutput' => 'XML',
             );
 
-            $outputResponse = $soapClient->setOutput($outputParams);
+            $outputResponse = $this->soapClient->setOutput($outputParams);
         }//E# if statement
 
         if ($timeZone !== 'UTC' && is_int($timeZone)) {//Use different timezone from UTC
             $setTimezoneParams = array(
                 'sTimezone' => $timeZone,
             );
-            $setTimezoneResponse = $soapClient->setTimezone($setTimezoneParams);
+            $setTimezoneResponse = $this->soapClient->setTimezone($setTimezoneParams);
             var_dump($setTimezoneResponse);
         }//E# if statement
 
@@ -140,7 +135,7 @@ class Rescue {
             );
 
             //set the delimiter
-            $setDelimiterResponse = $soapClient->setDelimiter($delimiterParams);
+            $setDelimiterResponse = $this->soapClient->setDelimiter($delimiterParams);
             var_dump($setDelimiterResponse);
         }//E# if statement
         //Set the node
@@ -150,7 +145,7 @@ class Rescue {
         );
 
         //Get report and convert to array
-        $apiResponse = $soapClient->getReport_v2($getReportParams);
+        $apiResponse = $this->soapClient->getReport_v2($getReportParams);
 
         var_dump($apiResponse);
         
@@ -203,18 +198,17 @@ class Rescue {
      */
     public function getChatOrNote($chatOrNote, $sessionId) {
         //Initialize a soap client
-        $soapClient = new \SoapClient($this->link . "/api.asmx?wsdl");
-
+        $this->soapClient = new \SoapClient($this->link . "/api.asmx?wsdl");
+        
         //Set parameters
         $params = array(
-            'iSessionID' => $sessionId,
-            'sAuthCode' => $this->authCode
+            'iSessionID' => $sessionId
         );
 
         if ($chatOrNote == 'chat') {//Get chat
-            $apiResponse = $soapClient->getChat($params);
+            $apiResponse = $this->soapClient->getChat($params);
         } else if ($chatOrNote == 'note') {//Get note
-            $apiResponse = $soapClient->getNote($params);
+            $apiResponse = $this->soapClient->getNote($params);
         } else {//ERROR
             return 'ERROR';
         }//E# if else statement
