@@ -2,11 +2,6 @@
 
 namespace LogMeIn;
 
-use Guzzle\Http\Client;
-use SoapClient;
-use DateTime;
-use DateTimeZone;
-
 /**
  * S# Rescue() Class
  * @author Edwin Mugendi <edwinmugendi@gmail.com>
@@ -15,9 +10,11 @@ use DateTimeZone;
 class Rescue {
 
 //The API link
-    private $link;
-//The API auth code
-    private $authCode;
+    private $link = 'https://secure.logmeinrescue.com/API';
+//The API Email
+    private $email;
+//The API password
+    private $pwd;
 //Curl guzzle object
     private $guzzleClient;
 //Curl guzzle object
@@ -30,35 +27,13 @@ class Rescue {
      * Constructor
      * */
     public function __construct($email, $pwd) {
-        //Load configs
-        $configs = json_decode(file_get_contents(__DIR__ . '/configs.json'), true);
-        //Set configs
-        $this->link = $configs['link'];
-
-        //Intialize the guzzle client
-        $this->guzzleClient = new Client($this->link);
-
-        //Define utc timezone 
-        $utc = new DateTimeZone('UTC');
-
-        //Get last api call date
-        $lastDate = new DateTime($configs['authRequestedAt'], $utc);
-
-        //Get current date
-        $today = new DateTime(gmdate('Y-m-d'), $utc);
-
-        //Find date difference
-        $dDiff = $lastDate->diff($today);
-
-        if ($dDiff->days > 10) {
-            var_dump("more 10");
-            $this->authCode = $this->requestAuthCode($email, $pwd);
-        } else {
-            var_dump("less 10");
-            $this->authCode = $configs['authCode'];
-        }//E# if else statement
+        //Set email and pasword
+        $this->email = $email;
+        $this->pwd = $pwd;
+        $this->requestAuthCode($this->email, $this->pwd);
     }
 
+//E# __construct() function
 //E# __construct() function
 
     private function object_to_array($obj) {
@@ -79,7 +54,7 @@ class Rescue {
      * */
     public function requestAuthCode($email, $pwd) {
         //Build the url
-        $url = $this->link . '/requestAuthCode.aspx?email=' . $email . '&pwd=' . $pwd;
+        $url = $this->link . '/login.aspx?email=' . $email . '&pwd=' . $pwd;
         // Get cURL resource
         $curl = curl_init();
 
@@ -90,31 +65,15 @@ class Rescue {
         ));
 
         // Send the request & save response to response
-        $response = curl_exec($curl);
+        $response = trim(curl_exec($curl));
 
         // Close request to clear up some resources
         curl_close($curl);
 
-        if ($response == 'INVALID') {//Invalid request
-            return 'INVALID';
+        if ($response == 'OK') {//Invalid request
+            return 'OK';
         } else {//Sucessful request
-            //Get auth code
-            $authCode = substr($response, strpos($response, 'AUTHCODE') + 9);
-
-            //Load configs
-            $configs = json_decode(file_get_contents(__DIR__ . '/configs.json'), true);
-
-            //Set auth code and last date to request auth
-            $configs['authCode'] = $authCode;
-            $configs['authRequestedAt'] = gmdate("Y-m-d");
-
-            //Open and save the configss
-            $fp = fopen(__DIR__ . '/configs.json', 'w+');
-            fwrite($fp, json_encode($configs));
-            fclose($fp);
-
-            //Return auth code
-            return $authCode;
+            die('Failed to login, kindly check your password is correct');
         }//E# if else statement
     }
 
@@ -122,12 +81,20 @@ class Rescue {
 
     public function getReportV2($beginDate, $endDate, $reportArea, $nodeId, $beginTime = null, $endTime = null, $timeZone = 'UTC', $output = 'TEXT', $delimiter = '|', $nodeRef = "NODE") {
         //Initialize a soap client
-        $soapClient = new SoapClient($this->link . "/api.asmx?wsdl");
-
-        //Set the report area
+        $soapClient = new \SoapClient($this->link . "/api.asmx?wsdl");
+        
+        //define parameters
+        $loginParams = array(
+            'sEmail' => $this->email,
+            'sPassword' => $this->pwd
+        );
+        
+        //login
+        $loginResult = $soapClient->login($loginParams);
+        
+         //Set the report area
         $reportAreaParams = array(
-            'eReportArea' => $reportArea,
-            'sAuthCode' => $this->authCode
+            'eReportArea' => $reportArea
         );
 
         $setReportAreaResponse = $soapClient->setReportArea_v2($reportAreaParams);
@@ -136,7 +103,6 @@ class Rescue {
         $reportDateParams = array(
             'dBeginDate' => $beginDate,
             'dEndDate' => $endDate,
-            'sAuthCode' => $this->authCode
         );
 
         $setReportDateResponse = $soapClient->setReportDate_v2($reportDateParams);
@@ -146,7 +112,6 @@ class Rescue {
             $reportTimeParams = array(
                 'bTime' => $beginDate,
                 'eTime' => $endDate,
-                'sAuthCode' => $this->authCode
             );
             $setReportTimeResponse = $soapClient->setReportTime($reportTimeParams);
         }//E# statement
@@ -155,7 +120,6 @@ class Rescue {
             //Set time range
             $outputParams = array(
                 'eOutput' => 'XML',
-                'sAuthCode' => $this->authCode
             );
 
             $outputResponse = $soapClient->setOutput($outputParams);
@@ -164,18 +128,15 @@ class Rescue {
         if ($timeZone !== 'UTC' && is_int($timeZone)) {//Use different timezone from UTC
             $setTimezoneParams = array(
                 'sTimezone' => $timeZone,
-                'sAuthCode' => $this->authCode
             );
             $setTimezoneResponse = $soapClient->setTimezone($setTimezoneParams);
             var_dump($setTimezoneResponse);
         }//E# if statement
 
-
         if ($delimiter !== '|') {
             //define parameters
             $delimiterParams = array(
                 'sDelimiter' => $delimiter,
-                'sAuthCode' => $this->authCode
             );
 
             //set the delimiter
@@ -186,13 +147,13 @@ class Rescue {
         $getReportParams = array(
             'iNodeID' => $nodeId,
             'eNodeRef' => $nodeRef,
-            'sAuthCode' => $this->authCode
         );
 
         //Get report and convert to array
         $apiResponse = $soapClient->getReport_v2($getReportParams);
 
         var_dump($apiResponse);
+        
         //Get the api code
         $apiResponseCode = strtoupper(substr($apiResponse->getReport_v2Result, 10));
 
@@ -242,7 +203,7 @@ class Rescue {
      */
     public function getChatOrNote($chatOrNote, $sessionId) {
         //Initialize a soap client
-        $soapClient = new SoapClient($this->link . "/api.asmx?wsdl");
+        $soapClient = new \SoapClient($this->link . "/api.asmx?wsdl");
 
         //Set parameters
         $params = array(

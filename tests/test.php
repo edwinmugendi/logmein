@@ -4,7 +4,7 @@ require_once __DIR__ . '/../vendor/autoload.php'; // Autoload files using Compos
 
 use LogMeIn\Rescue;
 
-$rescue = new Rescue('edwin.sapama@gmail.com', '');
+$rescue = new Rescue('edwin.sapama@gmail.com', 'Computer1');
 /*
   //Request Auth Code
   $authCode = $rescue->requestAuthCode('edwin.sapama@gmail.com', '');
@@ -13,7 +13,7 @@ $rescue = new Rescue('edwin.sapama@gmail.com', '');
  */
 
   //Repport
-  $report = $rescue->getReportV2('2014-02-20T07:00:00', '2014-02-20T12:30:20', 'SESSION', 7426179,null,null,'UTC','TEXT','|');
+  $report = $rescue->getReportV2('2014-04-01T07:00:00', '2014-04-01T08:30:20', 'SESSION', 7426179,null,null,'UTC','TEXT','|');
   var_dump($report);
 
 /*
