@@ -93,7 +93,6 @@ class Rescue {
         );
 
         $setReportAreaResponse = $this->soapClient->setReportArea_v2($reportAreaParams);
-        //  var_dump($setReportAreaResponse);
         //Set date ranges
         $reportDateParams = array(
             'dBeginDate' => $beginDate,
@@ -101,7 +100,6 @@ class Rescue {
         );
 
         $setReportDateResponse = $this->soapClient->setReportDate_v2($reportDateParams);
-        // var_dump($setReportDateResponse);
         //Set time range
         if (!is_null($beginTime) && !is_null($beginTime)) {
             $reportTimeParams = array(
@@ -125,7 +123,7 @@ class Rescue {
                 'sTimezone' => $timeZone,
             );
             $setTimezoneResponse = $this->soapClient->setTimezone($setTimezoneParams);
-            var_dump($setTimezoneResponse);
+           
         }//E# if statement
 
         if ($delimiter !== '|') {
@@ -136,7 +134,7 @@ class Rescue {
 
             //set the delimiter
             $setDelimiterResponse = $this->soapClient->setDelimiter($delimiterParams);
-            var_dump($setDelimiterResponse);
+           
         }//E# if statement
         //Set the node
         $getReportParams = array(
@@ -146,9 +144,7 @@ class Rescue {
 
         //Get report and convert to array
         $apiResponse = $this->soapClient->getReport_v2($getReportParams);
-
-        var_dump($apiResponse);
-        
+ 
         //Get the api code
         $apiResponseCode = strtoupper(substr($apiResponse->getReport_v2Result, 10));
 
@@ -205,7 +201,6 @@ class Rescue {
 
         if ($chatOrNote == 'chat') {//Get chat
             $apiResponse = $this->soapClient->getChat($params);
-            var_dump($apiResponse);
         } else if ($chatOrNote == 'note') {//Get note
             $apiResponse = $this->soapClient->getNote($params);
         } else {//ERROR
